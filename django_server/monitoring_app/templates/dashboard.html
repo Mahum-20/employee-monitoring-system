@@ -1,0 +1,512 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Employee Monitoring & 24h Storage Engine{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .storage-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .storage-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+    }
+
+    .metric-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        font-family: 'Space Mono', monospace;
+        color: #fff;
+    }
+
+    /* Storage Progress Bar */
+    .progress-bar-bg {
+        width: 100%;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 0.75rem 0 0.5rem 0;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.5s ease;
+    }
+
+    .fill-success { background: linear-gradient(90deg, #10b981, #34d399); }
+    .fill-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .fill-danger { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    .status-pill {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .status-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+    /* Filter Section */
+    .filter-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .employee-select {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid var(--card-border);
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .employee-select option {
+        background: #0f172a;
+    }
+
+    /* Recordings Grid */
+    .recordings-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .recording-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        position: relative;
+    }
+
+    .recording-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4), 0 0 20px var(--glass-glow);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .recording-thumb {
+        width: 100%;
+        height: 170px;
+        background: #090d16;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 1rem;
+    }
+
+    .recording-thumb video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .thumb-play-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        cursor: pointer;
+    }
+
+    .recording-thumb:hover .thumb-play-overlay {
+        opacity: 1;
+    }
+
+    .play-btn-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--accent-blue);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    }
+
+    .expiry-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        color: #fbbf24;
+        font-size: 0.72rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'Space Mono', monospace;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        z-index: 2;
+    }
+
+    .recording-info {
+        margin-bottom: 1rem;
+    }
+
+    .emp-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .emp-meta {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: auto;
+    }
+
+    .card-actions .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Modal Player */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .modal-overlay.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: #0f172a;
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 960px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--card-border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 0;
+        background: #000;
+        display: flex;
+        justify-content: center;
+    }
+
+    .modal-body video {
+        width: 100%;
+        max-height: 70vh;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        background: #0a0e17;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+        grid-column: 1 / -1;
+    }
+
+    .empty-icon {
+        font-size: 3.5rem;
+        color: rgba(255, 255, 255, 0.15);
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 900px) {
+        .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 550px) {
+        .metrics-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Metrics Cards -->
+<div class="metrics-grid">
+    <!-- Server Storage 400MB Limit Meter -->
+    <div class="glass-card storage-card">
+        <div class="metric-title">
+            <span>Server Storage Guard</span>
+            <span class="status-pill status-{{ storage.status_level }}">
+                {{ storage.used_percent }}% Used
+            </span>
+        </div>
+        <div class="metric-value">{{ storage.used_mb }} <span style="font-size: 1rem; color: var(--text-muted);">/ {{ storage.limit_mb }} MB</span></div>
+        
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill fill-{{ storage.status_level }}" style="width: {{ storage.used_percent }}%;"></div>
+        </div>
+        
+        <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 4px;">
+            <span>Free Space: <strong>{{ storage.free_mb }} MB</strong></span>
+            <span>Auto 24h Purge Active</span>
+        </div>
+    </div>
+
+    <!-- Active Employees -->
+    <div class="glass-card">
+        <div class="metric-title">
+            <span>Online Laptops</span>
+            <i class="fa-solid fa-wifi" style="color: var(--success-color);"></i>
+        </div>
+        <div class="metric-value" style="color: var(--success-color);">{{ online_count }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Out of {{ employees.count }} registered employees</div>
+    </div>
+
+    <!-- Total Active Recordings -->
+    <div class="glass-card">
+        <div class="metric-title">
+            <span>24h Video Chunks</span>
+            <i class="fa-solid fa-video" style="color: var(--accent-cyan);"></i>
+        </div>
+        <div class="metric-value" style="color: var(--accent-cyan);">{{ total_recordings_count }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Auto-deletes after 24 hours</div>
+    </div>
+
+    <!-- Client Agent Quick Help -->
+    <div class="glass-card">
+        <div class="metric-title">
+            <span>Laptop Client Software</span>
+            <i class="fa-solid fa-laptop-code" style="color: var(--accent-purple);"></i>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+            Install <code>Install_Silent_Service.bat</code> on laptops to auto-discover employees.
+        </div>
+        <button onclick="window.location.reload()" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh Live Feed
+        </button>
+    </div>
+</div>
+
+<!-- Header & Filter -->
+<div class="filter-header">
+    <div>
+        <h2 style="font-weight: 700; font-size: 1.5rem; color: #fff;">
+            {% if selected_employee %}
+            Recordings for {{ selected_employee.name }}
+            {% else %}
+            Live Employee Screen Recordings (Last 24 Hours)
+            {% endif %}
+        </h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Real-time feed from installed laptops. Files automatically self-destruct 24 hours after creation.
+        </p>
+    </div>
+
+    <form method="GET" action="{% url 'dashboard' %}" style="display: flex; gap: 8px; align-items: center;">
+        <select name="employee" class="employee-select" onchange="this.form.submit()">
+            <option value="">-- Filter by Connected Employee --</option>
+            {% for emp in employees %}
+            <option value="{{ emp.id }}" {% if selected_employee.id == emp.id %}selected{% endif %}>
+                {{ emp.name }} ({{ emp.employee_code }})
+            </option>
+            {% endfor %}
+        </select>
+        {% if selected_employee %}
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-sm"><i class="fa-solid fa-xmark"></i> Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Recordings Grid -->
+<div class="recordings-grid">
+    {% for rec in recordings %}
+    <div class="glass-card recording-card">
+        
+        <!-- Expiration countdown badge -->
+        <div class="expiry-badge">
+            <i class="fa-regular fa-clock"></i> {{ rec.time_until_expiration }}
+        </div>
+
+        <!-- Video Thumbnail Preview -->
+        <div class="recording-thumb" onclick="openPlayer('{{ rec.video_file.url }}', '{{ rec.employee.name }} - {{ rec.recorded_at|date:"Y-m-d H:i:s" }}')">
+            <video src="{{ rec.video_file.url }}" preload="metadata" muted></video>
+            <div class="thumb-play-overlay">
+                <div class="play-btn-circle">
+                    <i class="fa-solid fa-play"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details -->
+        <div class="recording-info">
+            <div class="emp-name">{{ rec.employee.name }}</div>
+            <div class="emp-meta">
+                <span class="meta-item"><i class="fa-solid fa-laptop"></i> {{ rec.device.hostname|default:rec.employee.employee_code }}</span>
+                <span class="meta-item"><i class="fa-solid fa-stopwatch"></i> {{ rec.formatted_duration }}</span>
+                <span class="meta-item"><i class="fa-solid fa-hard-drive"></i> {{ rec.file_size_mb }} MB</span>
+            </div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
+                <i class="fa-regular fa-calendar-check"></i> Recorded At: {{ rec.recorded_at|date:"M d, Y - H:i:s" }}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openPlayer('{{ rec.video_file.url }}', '{{ rec.employee.name }} - {{ rec.recorded_at|date:"Y-m-d H:i:s" }}')">
+                <i class="fa-solid fa-play"></i> Watch
+            </button>
+            <a href="{% url 'download_recording' rec.id %}" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-download"></i> Download
+            </a>
+            <a href="{% url 'delete_recording' rec.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Permanently delete this recording file from server?');">
+                <i class="fa-solid fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state glass-card">
+        <div class="empty-icon"><i class="fa-solid fa-laptop"></i></div>
+        <h3>No Laptops Connected Yet</h3>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+            Zero fake data is active. As soon as you run the software installer on employee laptops, each employee and their 1-hour screen videos will automatically appear here in real-time.
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- HTML5 Video Player Modal -->
+<div class="modal-overlay" id="playerModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle" style="color: #fff; font-size: 1.1rem; font-weight: 600;">Stream Screen Recording</h3>
+            <button onclick="closePlayer()" style="background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <video id="modalVideo" controls autoplay></video>
+        </div>
+        <div class="modal-footer">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Playback Speed:</span>
+                <button class="btn btn-secondary btn-sm" onclick="setSpeed(1)">1x</button>
+                <button class="btn btn-secondary btn-sm" onclick="setSpeed(2)">2x</button>
+                <button class="btn btn-secondary btn-sm" onclick="setSpeed(4)">4x (Fast)</button>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="closePlayer()">Close</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openPlayer(videoUrl, title) {
+        const modal = document.getElementById('playerModal');
+        const video = document.getElementById('modalVideo');
+        const modalTitle = document.getElementById('modalTitle');
+        
+        modalTitle.innerText = title;
+        video.src = videoUrl;
+        modal.classList.add('active');
+        video.play();
+    }
+
+    function closePlayer() {
+        const modal = document.getElementById('playerModal');
+        const video = document.getElementById('modalVideo');
+        video.pause();
+        video.src = '';
+        modal.classList.remove('active');
+    }
+
+    function setSpeed(speed) {
+        const video = document.getElementById('modalVideo');
+        video.playbackRate = speed;
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePlayer();
+        }
+    });
+</script>
+{% endblock %}

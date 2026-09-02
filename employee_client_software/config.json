@@ -1,0 +1,11 @@
+{
+    "server_url": "http://127.0.0.1:8000",
+    "employee_code": "EMP001",
+    "employee_name": "Demo Employee",
+    "employee_email": "demo@company.local",
+    "fps": 2,
+    "chunk_duration_minutes": 60,
+    "target_width": 1280,
+    "target_height": 720,
+    "auto_start": false
+}

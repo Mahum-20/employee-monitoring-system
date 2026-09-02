@@ -1,0 +1,31 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+env.bak/
+venv.bak/
+
+# Django files
+*.sqlite3
+media/recordings/*
+!media/recordings/.gitkeep
+
+# Client temporary recording storage
+employee_client_software/temp_recordings/*
+!employee_client_software/temp_recordings/.gitkeep
+
+# PyInstaller / Build artifacts
+employee_client_software/build/
+employee_client_software/dist/
+*.exe
+
+# IDE / OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
