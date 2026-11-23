@@ -8,7 +8,7 @@ pyinstaller_cmd = [
     "--noconfirm",
     "--onedir",
     "--windowed",
-    "--name", "EmployeeMonitorClient",
+    "--name", "UltraMonitor",
     "--add-data", "config.json;.",
     "main_gui.py"
 ]
@@ -16,6 +16,6 @@ pyinstaller_cmd = [
 print(f"Running command: {' '.join(pyinstaller_cmd)}")
 try:
     res = subprocess.run(pyinstaller_cmd, check=True)
-    print("\n[+] Build successful! Standalone software folder created in: dist/EmployeeMonitorClient/")
+    print("\n[+] Build successful! Standalone software folder created in: dist/UltraMonitor/")
 except Exception as e:
     print(f"[-] Build error (PyInstaller may need to be installed): {e}")

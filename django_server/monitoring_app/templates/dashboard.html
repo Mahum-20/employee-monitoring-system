@@ -351,15 +351,15 @@
     <!-- Client Agent Quick Help -->
     <div class="glass-card">
         <div class="metric-title">
-            <span>Laptop Client Software</span>
-            <i class="fa-solid fa-laptop-code" style="color: var(--accent-purple);"></i>
+            <span>Client Agent Script</span>
+            <i class="fa-solid fa-download" style="color: var(--accent-purple);"></i>
         </div>
         <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
-            Install <code>Install_Silent_Service.bat</code> on laptops to auto-discover employees.
+            Run <code>python recorder.py</code> on employee laptops to stream activity.
         </div>
-        <button onclick="window.location.reload()" class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center;">
-            <i class="fa-solid fa-arrows-rotate"></i> Refresh Live Feed
-        </button>
+        <a href="{% url 'employee_list' %}" class="btn btn-secondary btn-sm">
+            <i class="fa-solid fa-key"></i> View Employee Codes
+        </a>
     </div>
 </div>
 
@@ -370,17 +370,17 @@
             {% if selected_employee %}
             Recordings for {{ selected_employee.name }}
             {% else %}
-            Live Employee Screen Recordings (Last 24 Hours)
+            All Screen Recordings (Last 24 Hours)
             {% endif %}
         </h2>
         <p style="color: var(--text-muted); font-size: 0.9rem;">
-            Real-time feed from installed laptops. Files automatically self-destruct 24 hours after creation.
+            Watch or download recordings. Files automatically self-destruct 24 hours after creation.
         </p>
     </div>
 
     <form method="GET" action="{% url 'dashboard' %}" style="display: flex; gap: 8px; align-items: center;">
         <select name="employee" class="employee-select" onchange="this.form.submit()">
-            <option value="">-- Filter by Connected Employee --</option>
+            <option value="">-- All Employees --</option>
             {% for emp in employees %}
             <option value="{{ emp.id }}" {% if selected_employee.id == emp.id %}selected{% endif %}>
                 {{ emp.name }} ({{ emp.employee_code }})
@@ -422,7 +422,7 @@
                 <span class="meta-item"><i class="fa-solid fa-hard-drive"></i> {{ rec.file_size_mb }} MB</span>
             </div>
             <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">
-                <i class="fa-regular fa-calendar-check"></i> Recorded At: {{ rec.recorded_at|date:"M d, Y - H:i:s" }}
+                <i class="fa-regular fa-calendar-check"></i> Captured: {{ rec.recorded_at|date:"M d, Y - H:i:s" }}
             </div>
         </div>
 
@@ -434,17 +434,14 @@
             <a href="{% url 'download_recording' rec.id %}" class="btn btn-primary btn-sm">
                 <i class="fa-solid fa-download"></i> Download
             </a>
-            <a href="{% url 'delete_recording' rec.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Permanently delete this recording file from server?');">
-                <i class="fa-solid fa-trash"></i> Delete
-            </a>
         </div>
     </div>
     {% empty %}
     <div class="empty-state glass-card">
-        <div class="empty-icon"><i class="fa-solid fa-laptop"></i></div>
-        <h3>No Laptops Connected Yet</h3>
-        <p style="margin-top: 0.5rem; font-size: 0.9rem; max-width: 500px; margin-left: auto; margin-right: auto;">
-            Zero fake data is active. As soon as you run the software installer on employee laptops, each employee and their 1-hour screen videos will automatically appear here in real-time.
+        <div class="empty-icon"><i class="fa-solid fa-film"></i></div>
+        <h3>No Screen Recordings Available</h3>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            There are currently no recordings stored. Run the employee recorder script on client laptops to begin capturing screen activity.
         </p>
     </div>
     {% endfor %}

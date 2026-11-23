@@ -9,7 +9,7 @@ from agent_engine import EmployeeMonitorEngine, load_config, save_config
 class EmployeeMonitorApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Employee Screen Monitor - Client Laptop Software")
+        self.root.title("UltraMonitor - Client Software")
         self.root.geometry("640 x 680")
         self.root.minsize(580, 600)
         
@@ -47,7 +47,7 @@ class EmployeeMonitorApp:
         header = tk.Frame(self.root, bg=self.card_bg, padx=20, pady=15)
         header.pack(fill='x')
         
-        title_lbl = tk.Label(header, text="💻 Employee Monitor Client", font=("Segoe UI", 16, "bold"), fg="#ffffff", bg=self.card_bg)
+        title_lbl = tk.Label(header, text="💻 UltraMonitor Client", font=("Segoe UI", 16, "bold"), fg="#ffffff", bg=self.card_bg)
         title_lbl.pack(anchor='w')
         
         subtitle_lbl = tk.Label(header, text="Records laptop screen activity & streams compressed clips to Django server", font=("Segoe UI", 9), fg=self.muted_color, bg=self.card_bg)

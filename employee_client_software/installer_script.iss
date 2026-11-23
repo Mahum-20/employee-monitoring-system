@@ -1,10 +1,10 @@
-; Inno Setup Script for Silent Employee Monitor Agent
+; Inno Setup Script for Silent UltraMonitor
 [Setup]
-AppName=Employee Monitor Agent
+AppName=UltraMonitor
 AppVersion=1.0
-DefaultDirName={userappdata}\EmployeeMonitorAgent
-DefaultGroupName=Employee Monitor
-OutputBaseFilename=EmployeeMonitor_Setup
+DefaultDirName={userappdata}\UltraMonitor
+DefaultGroupName=UltraMonitor
+OutputBaseFilename=UltraMonitor_Setup
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -12,11 +12,11 @@ CreateUninstallRegKey=no
 ArchitecturesInstallIn64BitMode=x64
 
 [Files]
-Source: "dist\EmployeeMonitor_Installer_Package\EmployeeMonitorSilent.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "dist\EmployeeMonitor_Installer_Package\config.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\UltraMonitor_Installer_Package\UltraMonitorSilent.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\UltraMonitor_Installer_Package\config.json"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "EmployeeMonitorAgent"; ValueData: """{app}\EmployeeMonitorSilent.exe"""; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "UltraMonitorAgent"; ValueData: """{app}\UltraMonitorSilent.exe"""; Flags: uninsdeletevalue
 
 [Run]
-Filename: "{app}\EmployeeMonitorSilent.exe"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\UltraMonitorSilent.exe"; Flags: nowait postinstall skipifsilent

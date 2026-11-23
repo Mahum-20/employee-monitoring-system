@@ -4,7 +4,7 @@
     "employee_name": "Demo Employee",
     "employee_email": "demo@company.local",
     "fps": 2,
-    "chunk_duration_minutes": 60,
+    "chunk_duration_minutes": 15,
     "target_width": 1280,
     "target_height": 720,
     "auto_start": false

@@ -144,17 +144,6 @@ def download_recording_view(request, pk):
     )
 
 
-@login_required(login_url='/login/')
-def delete_recording_view(request, pk):
-    """
-    Manual delete endpoint for employer to permanently remove a recording.
-    """
-    recording = get_object_or_404(ScreenRecording, pk=pk)
-    recording.delete()  # Removes file from disk and database entry
-    messages.success(request, "Recording permanently deleted.")
-    return redirect('dashboard')
-
-
 # =====================================================================
 # REST API ENDPOINTS FOR CLIENT LAPTOP AGENT (PUBLIC API FOR LAPTOPS)
 # =====================================================================
@@ -163,7 +152,6 @@ def delete_recording_view(request, pk):
 def api_register_device(request):
     """
     Client agent registration endpoint.
-    Dynamically registers or updates employee and laptop device details from client config.json.
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
@@ -180,19 +168,14 @@ def api_register_device(request):
         if not employee_code:
             return JsonResponse({'error': 'employee_code is required'}, status=400)
             
-        employee = Employee.objects.filter(employee_code=employee_code).first()
-        if not employee:
-            employee = Employee.objects.create(
-                employee_code=employee_code,
-                name=name,
-                email=email,
-                department='Operations'
-            )
-        else:
-            # Update name if changed in software config.json
-            if name and employee.name != name:
-                employee.name = name
-                employee.save()
+        employee, created = Employee.objects.get_or_create(
+            employee_code=employee_code,
+            defaults={
+                'name': name,
+                'email': email,
+                'department': 'Operations'
+            }
+        )
         
         device, _ = Device.objects.get_or_create(
             employee=employee,
@@ -249,7 +232,6 @@ def api_upload_chunk(request):
     """
     Client agent video chunk uploader endpoint.
     Receives screen recording file chunk (e.g. 1-hour WebM file).
-    Dynamically registers employee if not already in system.
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'POST required'}, status=405)
@@ -264,12 +246,7 @@ def api_upload_chunk(request):
 
     employee = Employee.objects.filter(employee_code=employee_code).first()
     if not employee:
-        employee = Employee.objects.create(
-            employee_code=employee_code,
-            name=f"Employee ({employee_code})",
-            email=f"{employee_code}@company.local",
-            department="Operations"
-        )
+        return JsonResponse({'error': f'Employee code {employee_code} not recognized'}, status=404)
 
     # Check server storage space before saving
     storage = get_storage_usage()
